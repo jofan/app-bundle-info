@@ -50,8 +50,8 @@ class iOSAppBundleInfo extends AppBundleInfo
       callback(null,@_info.plist)
 
 
-  getIconFile:(callback)->
-    @findFileStream('Payload/*.app/AppIcon60x60@*.png',(err,stream)->
+  getIconFile:(iconFileName='AppIcon60x60@*.png', callback)->
+    @findFileStream("Payload/*.app/#{iconFileName}",(err,stream)->
       return callback(err) if err
       return callback() if not stream
       cgbiToPng(stream,callback)
