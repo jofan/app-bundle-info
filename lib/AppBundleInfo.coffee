@@ -6,6 +6,7 @@ tmp = require('tmp')
 glob = require('glob')
 Lock = require('lock')
 fstream = require('fstream')
+AdmZip = require('adm-zip')
 
 class AndroidAppBundleInfo
   constructor:(@pathOrStream)->
@@ -32,22 +33,25 @@ class AndroidAppBundleInfo
       return callback()
     @lock('extract',(release)=>
       callback = release(callback)
-      @_getFileStream((err,stream)=>
+      zip = new AdmZip @pathOrStream
+      # @_getFileStream((err,stream)=>
+        # return callback(err) if err
+      tmp.dir((err,extractPath)=>
         return callback(err) if err
-        tmp.dir((err,extractPath)=>
-          return callback(err) if err
-          @extractPath = extractPath
-          writeStream = fstream.Writer(@extractPath)
-#          console.log('extracting',@extractPath)
-          stream.pipe(unzip.Parse())
-            .pipe(writeStream)
-            .on('close',()=>
-              @extracted = yes
-              callback()
-            )
-            .on('error',callback)
-        )
+        @extractPath = extractPath
+        zip.extractAllTo extractPath, true
+        @extracted = yes
+        callback()
+        # writeStream = fstream.Writer(@extractPath)
+        # stream.pipe(unzip.Parse())
+        #   .pipe(writeStream)
+        #   .on('close',()=>
+        #     @extracted = yes
+        #     callback()
+        #   )
+        #   .on('error',callback)
       )
+      # )
     )
 
   _getFileStream:(callback)->
